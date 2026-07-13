@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+build/
+.turbo/
+
+# test artifacts
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# environment
+.env
+.env.*
+!.env.example
+
+# editor / OS
+.DS_Store
+*.local
+.idea/
+*.swp
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
