@@ -12,6 +12,9 @@ playwright-report/
 test-results/
 blob-report/
 
+# local databases
+apps/api/data/
+
 # environment
 .env
 .env.*

@@ -1,0 +1,31 @@
+{
+  "name": "@mathprep/api",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "start:prod": "node dist/server.js",
+    "build": "tsup",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.8",
+    "@mathprep/core": "workspace:*",
+    "hono": "^4.12.29"
+  },
+  "devDependencies": {
+    "@mathprep/eslint-config": "workspace:*",
+    "@mathprep/typescript-config": "workspace:*",
+    "@types/node": "^26.1.1",
+    "eslint": "^10.7.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "extends": "@mathprep/typescript-config/base.json",
+  "include": ["src", "vitest.config.ts", "tsup.config.ts"]
+}

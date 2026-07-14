@@ -28,6 +28,7 @@ If running `playwright test` directly (not via turbo), build first: `pnpm --filt
 3. HTML report: `pnpm --filter @mathprep/web exec playwright show-report`.
 4. A `webServer` timeout usually means port 4173 is occupied by a stale process — kill it.
 5. Testing a stale build is the classic trap: if app code changed, rebuild before rerunning Playwright directly.
+6. **Stale API server**: `reuseExistingServer` will happily reuse an orphaned api process on port 3001 (aborted runs can leave the tsx grandchild alive). Symptom: reads work but POSTs return 500 (especially if `apps/api/data/dev.db` was deleted under a running server). Fix: `lsof -nP -i :3001` and kill the stale node process.
 
 ## Authoring conventions
 

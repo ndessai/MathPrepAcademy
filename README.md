@@ -15,11 +15,15 @@ Monorepo of React webapps for math tutoring, adaptive assessment, and personaliz
 
 ```
 apps/
-  web/                  # student-facing app: tutoring, assessment, roadmap (@mathprep/web)
+  web/                  # student-facing app: AMC 8 assessment portal (@mathprep/web)
+  api/                  # assessment API: Hono + SQLite, seeded question bank (@mathprep/api)
 packages/
+  core/                 # shared domain: types, schemas, taxonomy, scoring (@mathprep/core)
   ui/                   # shared React components (@mathprep/ui)
   eslint-config/        # shared ESLint presets (@mathprep/eslint-config)
   typescript-config/    # shared tsconfig presets (@mathprep/typescript-config)
+docs/
+  amc8-analysis.md      # AMC 8 exam research: format, dates, cutoffs, curriculum
 ```
 
 ## Getting started
@@ -29,8 +33,11 @@ Requires Node 24+ (see `.node-version`) and pnpm 11+ (`corepack enable`).
 ```bash
 pnpm install
 pnpm --filter @mathprep/web exec playwright install chromium   # once, for e2e
-pnpm --filter @mathprep/web dev                                # http://localhost:5173
+pnpm dev                                                       # api on :3001 + web on :5173
 ```
+
+The web app proxies `/api` to the API server. The SQLite database
+(`apps/api/data/dev.db`) is created and seeded with the question bank on first boot.
 
 ## Everyday commands
 

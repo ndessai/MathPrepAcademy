@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 4173;
+const API_PORT = 3001;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -18,9 +19,18 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command: `pnpm preview --port ${PORT} --strictPort`,
-    url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      // Fresh in-memory database, auto-seeded on boot.
+      command: "pnpm --filter @mathprep/api start",
+      url: `http://localhost:${API_PORT}/api/health`,
+      reuseExistingServer: !process.env.CI,
+      env: { DATABASE_PATH: ":memory:", PORT: String(API_PORT) },
+    },
+    {
+      command: `pnpm preview --port ${PORT} --strictPort`,
+      url: `http://localhost:${PORT}`,
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });
