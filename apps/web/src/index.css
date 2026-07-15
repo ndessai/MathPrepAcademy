@@ -197,6 +197,8 @@ button[data-variant="secondary"] {
 .question-stem {
   font-size: 1.1rem;
   margin-top: 0;
+  /* Stems may contain authored line breaks (bulleted fact lists). */
+  white-space: pre-line;
 }
 
 .choices {

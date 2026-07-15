@@ -9,6 +9,12 @@ The question bank lives in `apps/api/src/seed/questions.ts`; assessment definiti
 `apps/api/src/seed/assessments.ts`. Seed data is validated against the zod schemas in
 `@mathprep/core` at server boot and in `apps/api/src/seed/seed.test.ts`.
 
+**Read `style-guide.md` in this skill directory first** — it is the house style
+distilled from the real 2022-2025 AMC 8 exams (stem voice, story-per-band,
+reasoning-step targets, distractor menu, notation) plus the archetype catalog already
+used by the bank. New questions must match it and must not reuse an archetype already
+in the catalog for the same difficulty.
+
 ## Non-negotiable rules
 
 1. **Original content only.** Real AMC/MATHCOUNTS problems are copyrighted (MAA). Write
