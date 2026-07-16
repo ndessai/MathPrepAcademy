@@ -56,7 +56,8 @@ describe("GET /api/assessments", () => {
     const res = await app.request("/api/assessments");
     expect(res.status).toBe(200);
     const list = await json<AssessmentSummary[]>(res);
-    expect(list.length).toBe(10);
+    // 1 original mock + 1 diagnostic + 8 topic quizzes + one mock per practice set.
+    expect(list.length).toBeGreaterThanOrEqual(10);
     const mock = list.find((a) => a.id === "mock-01");
     expect(mock).toMatchObject({ questionCount: 25, timeLimitMinutes: 40, kind: "mock" });
   });

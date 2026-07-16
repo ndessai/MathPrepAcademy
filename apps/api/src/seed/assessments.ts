@@ -1,6 +1,8 @@
 import type { Assessment } from "@mathprep/core";
 import { TOPICS } from "@mathprep/core";
 
+import { PRACTICE_SETS } from "./sets";
+
 /**
  * The mock exam mirrors the real AMC 8's difficulty ramp:
  * questions 1-10 easy, 11-20 medium, 21-25 hard, mixed across topics.
@@ -79,6 +81,16 @@ function idPrefix(topicId: string): string {
   return prefix;
 }
 
+const PRACTICE_MOCKS: Assessment[] = PRACTICE_SETS.map((set) => ({
+  id: `mock-${String(set.setNumber).padStart(2, "0")}`,
+  title: `AMC 8 Mock Exam #${set.setNumber}`,
+  description:
+    "Full-length simulation: 25 questions in 40 minutes, with difficulty ramping just like the real AMC 8. No penalty for guessing — never leave a question blank.",
+  kind: "mock",
+  timeLimitMinutes: 40,
+  questionIds: set.questions.map((q) => q.id),
+}));
+
 export const ASSESSMENTS: Assessment[] = [
   {
     id: "mock-01",
@@ -98,5 +110,6 @@ export const ASSESSMENTS: Assessment[] = [
     timeLimitMinutes: 15,
     questionIds: DIAGNOSTIC_QUESTION_IDS,
   },
+  ...PRACTICE_MOCKS,
   ...TOPIC_QUIZZES,
 ];

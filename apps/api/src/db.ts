@@ -6,6 +6,7 @@ import { assessmentSchema, questionSchema } from "@mathprep/core";
 
 import { ASSESSMENTS } from "./seed/assessments";
 import { QUESTION_BANK } from "./seed/questions";
+import { PRACTICE_SETS } from "./seed/sets";
 
 export function openDatabase(path: string): DatabaseSync {
   if (path !== ":memory:") {
@@ -66,11 +67,13 @@ function seedIfEmpty(db: DatabaseSync): void {
     return;
   }
 
+  const allQuestions = [...QUESTION_BANK, ...PRACTICE_SETS.flatMap((s) => s.questions)];
+
   const insertQuestion = db.prepare(
     `INSERT INTO questions (id, topic, difficulty, stem, choices, answer_index, explanation, source)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   );
-  for (const raw of QUESTION_BANK) {
+  for (const raw of allQuestions) {
     const q = questionSchema.parse(raw);
     insertQuestion.run(
       q.id,
@@ -84,7 +87,7 @@ function seedIfEmpty(db: DatabaseSync): void {
     );
   }
 
-  const knownIds = new Set(QUESTION_BANK.map((q) => q.id));
+  const knownIds = new Set(allQuestions.map((q) => q.id));
   const insertAssessment = db.prepare(
     `INSERT INTO assessments (id, title, description, kind, time_limit_minutes, question_ids)
      VALUES (?, ?, ?, ?, ?, ?)`,

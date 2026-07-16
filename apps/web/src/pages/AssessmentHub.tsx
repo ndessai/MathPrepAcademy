@@ -96,7 +96,7 @@ export function AssessmentHub() {
       {exams.length > 0 && (
         <section>
           <h3>Exams</h3>
-          <ul className="assessment-list">
+          <ul className="assessment-list quiz-grid">
             {exams.map((a) => (
               <li key={a.id} className="assessment-card">
                 <div>

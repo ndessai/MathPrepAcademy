@@ -4,6 +4,7 @@ import { assessmentSchema, questionSchema } from "@mathprep/core";
 
 import { ASSESSMENTS } from "./assessments";
 import { QUESTION_BANK } from "./questions";
+import { PRACTICE_SETS } from "./sets";
 
 describe("question bank integrity", () => {
   it("every question passes the shared schema (5 distinct choices, valid answer index)", () => {
@@ -15,8 +16,11 @@ describe("question bank integrity", () => {
     }
   });
 
-  it("question ids are unique", () => {
-    const ids = QUESTION_BANK.map((q) => q.id);
+  it("question ids are unique across the bank and all practice sets", () => {
+    const ids = [
+      ...QUESTION_BANK.map((q) => q.id),
+      ...PRACTICE_SETS.flatMap((s) => s.questions.map((q) => q.id)),
+    ];
     expect(new Set(ids).size).toBe(ids.length);
   });
 
@@ -37,7 +41,9 @@ describe("question bank integrity", () => {
 });
 
 describe("assessment definitions", () => {
-  const questionById = new Map(QUESTION_BANK.map((q) => [q.id, q]));
+  const questionById = new Map(
+    [...QUESTION_BANK, ...PRACTICE_SETS.flatMap((s) => s.questions)].map((q) => [q.id, q]),
+  );
 
   it("every assessment passes the shared schema", () => {
     for (const a of ASSESSMENTS) {
@@ -65,6 +71,43 @@ describe("assessment definitions", () => {
     expect(difficulties.slice(0, 10).every((d) => d === "easy")).toBe(true);
     expect(difficulties.slice(10, 20).every((d) => d === "medium")).toBe(true);
     expect(difficulties.slice(20).every((d) => d === "hard")).toBe(true);
+  });
+
+  it("every practice set has 25 schema-valid questions ramping 10 easy / 10 medium / 5 hard", () => {
+    for (const set of PRACTICE_SETS) {
+      expect(set.questions, `set ${set.setNumber} length`).toHaveLength(25);
+      for (const q of set.questions) {
+        const result = questionSchema.safeParse(q);
+        expect(result.success, `question ${q.id}: ${JSON.stringify(result.error?.issues)}`).toBe(
+          true,
+        );
+      }
+      const difficulties = set.questions.map((q) => q.difficulty);
+      expect(
+        difficulties.slice(0, 10).every((d) => d === "easy"),
+        `set ${set.setNumber} easy`,
+      ).toBe(true);
+      expect(
+        difficulties.slice(10, 20).every((d) => d === "medium"),
+        `set ${set.setNumber} medium`,
+      ).toBe(true);
+      expect(
+        difficulties.slice(20).every((d) => d === "hard"),
+        `set ${set.setNumber} hard`,
+      ).toBe(true);
+      const topics = new Set(set.questions.map((q) => q.topic));
+      expect(topics.size, `set ${set.setNumber} topic variety`).toBeGreaterThanOrEqual(6);
+    }
+  });
+
+  it("every practice set has a matching mock assessment", () => {
+    for (const set of PRACTICE_SETS) {
+      const id = `mock-${String(set.setNumber).padStart(2, "0")}`;
+      const mock = ASSESSMENTS.find((a) => a.id === id);
+      expect(mock, `${id} missing`).toBeDefined();
+      expect(mock!.questionIds).toEqual(set.questions.map((q) => q.id));
+      expect(mock!.timeLimitMinutes).toBe(40);
+    }
   });
 
   it("each topic has a 6-question topic quiz", () => {
