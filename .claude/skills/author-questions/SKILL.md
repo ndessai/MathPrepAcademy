@@ -15,6 +15,17 @@ reasoning-step targets, distractor menu, notation) plus the archetype catalog al
 used by the bank. New questions must match it and must not reuse an archetype already
 in the catalog for the same difficulty.
 
+Also in this directory:
+
+- `amc8_archetypes.json` — 594 problem archetypes mined from 24 real AMC 8 exams
+  (1999-2025), with topic, difficulty bands, and the key insight for each.
+- `amc8_setplans.json` — slot-by-slot blueprints for practice sets 2-26 (topic
+  distribution, difficulty ramp, archetype per position). Sets 2-7 are built
+  (`apps/api/src/seed/sets/`); sets 8-26 are planned but not yet generated. To
+  generate more, follow the batched author/verify pipeline: 3 band-authors per set,
+  then 2 independent solvers per question escalating to 4 on disagreement, with a
+  repair round for failures. Never merge a question that failed solver consensus.
+
 ## Non-negotiable rules
 
 1. **Original content only.** Real AMC/MATHCOUNTS problems are copyrighted (MAA). Write

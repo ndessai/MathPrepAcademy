@@ -5,6 +5,7 @@ import { SET_03_QUESTIONS } from "./set-03";
 import { SET_04_QUESTIONS } from "./set-04";
 import { SET_05_QUESTIONS } from "./set-05";
 import { SET_06_QUESTIONS } from "./set-06";
+import { SET_07_QUESTIONS } from "./set-07";
 
 export interface PracticeSet {
   setNumber: number;
@@ -23,4 +24,5 @@ export const PRACTICE_SETS: PracticeSet[] = [
   { setNumber: 4, questions: SET_04_QUESTIONS },
   { setNumber: 5, questions: SET_05_QUESTIONS },
   { setNumber: 6, questions: SET_06_QUESTIONS },
+  { setNumber: 7, questions: SET_07_QUESTIONS },
 ];
