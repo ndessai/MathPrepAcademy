@@ -91,6 +91,23 @@ export interface TopicBreakdown {
   total: number;
 }
 
+/** An authenticated user as exposed to the web app. */
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  picture: string | null;
+}
+
+/**
+ * Tells the web app which sign-in methods the server offers: the Google
+ * client id when configured, and whether the dev (no-Google) sign-in is on.
+ */
+export interface AuthConfig {
+  googleClientId: string | null;
+  devLoginEnabled: boolean;
+}
+
 export interface ScoreReport {
   attemptId: string;
   assessmentId: string;

@@ -1,22 +1,32 @@
-import type { AssessmentSummary, AttemptSummary } from "@mathprep/core";
+import type { AssessmentSummary, AttemptSummary, ExamType } from "@mathprep/core";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@mathprep/ui";
 
 import { fetchAssessments, fetchStudentAttempts, startAttempt } from "../api/client";
+import { useUser } from "../auth/authContext";
 
-const NAME_STORAGE_KEY = "mathprep.studentName";
+const EXAM_SECTIONS = [
+  { type: "amc8", label: "AMC 8" },
+  { type: "amc10", label: "AMC 10" },
+  { type: "amc12", label: "AMC 12" },
+] as const;
+
+function parseExamFilter(value: string | null): ExamType | null {
+  return EXAM_SECTIONS.some((s) => s.type === value) ? (value as ExamType) : null;
+}
 
 export function AssessmentHub() {
+  const user = useUser();
   const [assessments, setAssessments] = useState<AssessmentSummary[] | null>(null);
-  const [studentName, setStudentName] = useState(
-    () => localStorage.getItem(NAME_STORAGE_KEY) ?? "",
-  );
   const [history, setHistory] = useState<AttemptSummary[]>([]);
   const [startingId, setStartingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const examFilter = parseExamFilter(searchParams.get("exam"));
 
   useEffect(() => {
     fetchAssessments()
@@ -24,14 +34,9 @@ export function AssessmentHub() {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : "Failed to load"));
   }, []);
 
-  const trimmedName = studentName.trim();
-
   useEffect(() => {
-    if (!trimmedName) {
-      return;
-    }
     let cancelled = false;
-    fetchStudentAttempts(trimmedName)
+    fetchStudentAttempts(user.name)
       .then((attempts) => {
         if (!cancelled) {
           setHistory(attempts.filter((a) => a.completedAt !== null));
@@ -43,59 +48,41 @@ export function AssessmentHub() {
     return () => {
       cancelled = true;
     };
-  }, [trimmedName]);
-
-  function updateName(name: string) {
-    setStudentName(name);
-    localStorage.setItem(NAME_STORAGE_KEY, name);
-    if (!name.trim()) {
-      setHistory([]);
-    }
-  }
+  }, [user.name]);
 
   async function handleStart(assessmentId: string) {
     setStartingId(assessmentId);
     setError(null);
     try {
-      const attempt = await startAttempt(assessmentId, trimmedName);
-      navigate(`/assessment/${assessmentId}/attempt/${attempt.id}`);
+      const attempt = await startAttempt(assessmentId, user.name);
+      await navigate(`/assessment/${assessmentId}/attempt/${attempt.id}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Could not start the assessment");
       setStartingId(null);
     }
   }
 
-  const quizzes = assessments?.filter((a) => a.kind === "topic-quiz") ?? [];
-  const examSections = (
-    [
-      { type: "amc8", label: "AMC 8" },
-      { type: "amc10", label: "AMC 10" },
-      { type: "amc12", label: "AMC 12" },
-    ] as const
-  )
+  const visible = examFilter
+    ? (assessments?.filter((a) => a.examType === examFilter) ?? [])
+    : (assessments ?? []);
+  const quizzes = visible.filter((a) => a.kind === "topic-quiz");
+  const examSections = EXAM_SECTIONS.filter((section) => !examFilter || section.type === examFilter)
     .map((section) => ({
       ...section,
-      items:
-        assessments?.filter((a) => a.kind !== "topic-quiz" && a.examType === section.type) ?? [],
+      items: visible.filter((a) => a.kind !== "topic-quiz" && a.examType === section.type),
     }))
     .filter((section) => section.items.length > 0);
+  const filterLabel = EXAM_SECTIONS.find((s) => s.type === examFilter)?.label;
 
   return (
     <div className="hub">
       <h2>Assessments</h2>
 
-      <section className="panel">
-        <h3>Who is practicing today?</h3>
-        <div className="student-picker">
-          <input
-            aria-label="Student name"
-            placeholder="Student name"
-            value={studentName}
-            onChange={(e) => updateName(e.target.value)}
-          />
-        </div>
-        {!trimmedName && <p className="hint">Enter a name to enable the start buttons.</p>}
-      </section>
+      {filterLabel && (
+        <p className="filter-note">
+          Showing {filterLabel} assessments · <Link to="/assessment">Show all</Link>
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="error">
@@ -104,6 +91,12 @@ export function AssessmentHub() {
       )}
 
       {assessments === null && !error && <p>Loading assessments…</p>}
+
+      {assessments !== null && visible.length === 0 && (
+        <p className="hint">
+          No assessments available{filterLabel ? ` for ${filterLabel}` : ""} yet.
+        </p>
+      )}
 
       {examSections.map((section) => (
         <section key={section.type}>
@@ -118,10 +111,7 @@ export function AssessmentHub() {
                     {a.questionCount} questions · {a.timeLimitMinutes} minutes
                   </p>
                 </div>
-                <Button
-                  disabled={!trimmedName || startingId !== null}
-                  onClick={() => void handleStart(a.id)}
-                >
+                <Button disabled={startingId !== null} onClick={() => void handleStart(a.id)}>
                   {startingId === a.id ? "Starting…" : `Start ${a.title}`}
                 </Button>
               </li>
@@ -144,7 +134,7 @@ export function AssessmentHub() {
                 </div>
                 <Button
                   variant="secondary"
-                  disabled={!trimmedName || startingId !== null}
+                  disabled={startingId !== null}
                   onClick={() => void handleStart(a.id)}
                 >
                   {startingId === a.id ? "Starting…" : `Start ${a.title}`}
@@ -155,9 +145,9 @@ export function AssessmentHub() {
         </section>
       )}
 
-      {trimmedName && history.length > 0 && (
+      {history.length > 0 && (
         <section>
-          <h3>Recent results for {trimmedName}</h3>
+          <h3>Recent results for {user.name}</h3>
           <ul className="history-list">
             {history.map((h) => (
               <li key={h.id}>

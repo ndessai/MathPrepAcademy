@@ -16,7 +16,8 @@
   "dependencies": {
     "@hono/node-server": "^2.0.8",
     "@mathprep/core": "workspace:*",
-    "hono": "^4.12.29"
+    "hono": "^4.12.29",
+    "jose": "^6.2.4"
   },
   "devDependencies": {
     "@mathprep/eslint-config": "workspace:*",

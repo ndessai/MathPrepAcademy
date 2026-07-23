@@ -55,6 +55,26 @@ function migrate(db: DatabaseSync): void {
     );
 
     CREATE INDEX IF NOT EXISTS idx_attempts_student ON attempts(student_name, started_at DESC);
+
+    -- google_sub is NULL for users created through the dev sign-in; the same
+    -- row is claimed by Google sign-in later via the email match.
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      google_sub TEXT UNIQUE,
+      email TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      picture TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      token TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
   `);
 }
 

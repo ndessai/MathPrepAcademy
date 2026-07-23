@@ -51,5 +51,16 @@ export const submitAttemptSchema = z.object({
   ),
 });
 
+export const googleLoginSchema = z.object({
+  credential: z.string().min(1),
+});
+
+export const devLoginSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  email: z.email().trim().toLowerCase().max(120),
+});
+
 export type StartAttemptBody = z.infer<typeof startAttemptSchema>;
 export type SubmitAttemptBody = z.infer<typeof submitAttemptSchema>;
+export type GoogleLoginBody = z.infer<typeof googleLoginSchema>;
+export type DevLoginBody = z.infer<typeof devLoginSchema>;

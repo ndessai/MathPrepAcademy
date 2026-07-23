@@ -11,6 +11,8 @@ import {
   topicBreakdown,
 } from "@mathprep/core";
 
+import type { AuthOptions } from "./authApp";
+import { createAuthApp } from "./authApp";
 import {
   completeAttempt,
   createAttempt,
@@ -22,10 +24,14 @@ import {
   listAttemptsByStudent,
 } from "./repository";
 
-export function createApp(db: DatabaseSync): Hono {
+const DEFAULT_AUTH: AuthOptions = { googleClientId: null, devLoginEnabled: true };
+
+export function createApp(db: DatabaseSync, auth: AuthOptions = DEFAULT_AUTH): Hono {
   const app = new Hono();
 
   app.get("/api/health", (c) => c.json({ status: "ok" }));
+
+  app.route("/api/auth", createAuthApp(db, auth));
 
   app.get("/api/assessments", (c) => c.json(listAssessments(db)));
 

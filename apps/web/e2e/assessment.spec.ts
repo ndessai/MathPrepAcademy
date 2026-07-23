@@ -1,12 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-import type { Page } from "@playwright/test";
-
-async function chooseStudent(page: Page, name: string) {
-  await page.getByRole("textbox", { name: "Student name" }).fill(name);
-}
+import { signIn } from "./helpers";
 
 test("hub lists the mock exam, diagnostic, and topic quizzes", async ({ page }) => {
+  await signIn(page, "Blake Rowe", "blake@example.com");
   await page.goto("/assessment");
   await expect(page.getByRole("heading", { name: "AMC 8 Mock Exam #1" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Quick Diagnostic" })).toBeVisible();
@@ -14,19 +11,11 @@ test("hub lists the mock exam, diagnostic, and topic quizzes", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Number Theory Quiz" })).toBeVisible();
 });
 
-test("start buttons unlock after entering a student name", async ({ page }) => {
-  await page.goto("/assessment");
-  const start = page.getByRole("button", { name: "Start Quick Diagnostic" });
-  await expect(start).toBeDisabled();
-  await chooseStudent(page, "Blake");
-  await expect(start).toBeEnabled();
-});
-
 test("a student can take the Quick Diagnostic end to end and see a score report", async ({
   page,
 }) => {
+  await signIn(page, "Alex Kim", "alex@example.com");
   await page.goto("/assessment");
-  await chooseStudent(page, "Alex");
   await page.getByRole("button", { name: "Start Quick Diagnostic" }).click();
 
   // Test-taking screen: title, timer, and question 1 of 10.
@@ -50,15 +39,15 @@ test("a student can take the Quick Diagnostic end to end and see a score report"
   // Score report: headline score out of 10, topic table, and 10 reviewed questions.
   await expect(page.getByRole("heading", { name: "Score report" })).toBeVisible();
   await expect(page.getByLabel("Score")).toHaveText(/^\d+ \/ 10$/);
-  await expect(page.getByText("Alex", { exact: false }).first()).toBeVisible();
+  await expect(page.getByText("Alex Kim", { exact: false }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "By topic" })).toBeVisible();
   await expect(page.locator(".review-item")).toHaveCount(10);
   await expect(page.getByText("Explanation").first()).toBeVisible();
 });
 
 test("submitting with unanswered questions asks for confirmation", async ({ page }) => {
+  await signIn(page, "Casey Boone", "casey@example.com");
   await page.goto("/assessment");
-  await chooseStudent(page, "Casey");
   await page.getByRole("button", { name: "Start Arithmetic & Ratios Quiz" }).click();
   await expect(page.getByText("Question 1 of 6")).toBeVisible();
 
@@ -76,8 +65,8 @@ test("submitting with unanswered questions asks for confirmation", async ({ page
 });
 
 test("completed attempts appear in the student's history on the hub", async ({ page }) => {
+  await signIn(page, "Drew Ellis", "drew@example.com");
   await page.goto("/assessment");
-  await chooseStudent(page, "Drew");
   await page.getByRole("button", { name: "Start Probability Quiz" }).click();
   await expect(page.getByText("Question 1 of 6")).toBeVisible();
 
@@ -86,7 +75,7 @@ test("completed attempts appear in the student's history on the hub", async ({ p
   await expect(page.getByRole("heading", { name: "Score report" })).toBeVisible();
 
   await page.getByRole("link", { name: "Back to assessments" }).click();
-  await expect(page.getByRole("heading", { name: "Recent results for Drew" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Recent results for Drew Ellis" })).toBeVisible();
   await expect(page.getByText("Probability Quiz —")).toBeVisible();
   await page.getByRole("link", { name: "View report" }).first().click();
   await expect(page.getByRole("heading", { name: "Score report" })).toBeVisible();
@@ -95,8 +84,8 @@ test("completed attempts appear in the student's history on the hub", async ({ p
 test("AMC 10 and AMC 12 mocks are listed and use official scoring (blanks earn 1.5)", async ({
   page,
 }) => {
+  await signIn(page, "Quinn Marsh", "quinn@example.com");
   await page.goto("/assessment");
-  await chooseStudent(page, "Quinn");
   await expect(page.getByRole("heading", { name: "AMC 10", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "AMC 12", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "AMC 12 Mock Exam #1" })).toBeVisible();
@@ -113,8 +102,8 @@ test("AMC 10 and AMC 12 mocks are listed and use official scoring (blanks earn 1
 });
 
 test("mock exam serves 25 questions with a 40-minute clock", async ({ page }) => {
+  await signIn(page, "Riley Chen", "riley@example.com");
   await page.goto("/assessment");
-  await chooseStudent(page, "Riley");
   await page.getByRole("button", { name: "Start AMC 8 Mock Exam #1" }).click();
   await expect(page.getByText("Question 1 of 25")).toBeVisible();
   await expect(page.getByRole("timer")).toHaveText(/^(39|40):\d{2}$/);

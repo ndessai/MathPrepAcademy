@@ -24,6 +24,8 @@ export {
   type GradedQuestion,
   type TopicBreakdown,
   type ScoreReport,
+  type AuthUser,
+  type AuthConfig,
 } from "./types";
 
 export {
@@ -31,8 +33,12 @@ export {
   assessmentSchema,
   startAttemptSchema,
   submitAttemptSchema,
+  googleLoginSchema,
+  devLoginSchema,
   type StartAttemptBody,
   type SubmitAttemptBody,
+  type GoogleLoginBody,
+  type DevLoginBody,
 } from "./schemas";
 
 export {

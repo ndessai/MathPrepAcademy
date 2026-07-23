@@ -3,6 +3,8 @@ import type {
   AssessmentSummary,
   Attempt,
   AttemptSummary,
+  AuthConfig,
+  AuthUser,
   ResponseMap,
   ScoreReport,
 } from "@mathprep/core";
@@ -24,6 +26,27 @@ function post<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
     headers: { "content-type": "application/json" },
   });
+}
+
+export function fetchAuthConfig(): Promise<AuthConfig> {
+  return request("/auth/config");
+}
+
+/** Resolves the signed-in user; rejects with a 401 error when signed out. */
+export function fetchMe(): Promise<AuthUser> {
+  return request("/auth/me");
+}
+
+export function signInWithGoogle(credential: string): Promise<AuthUser> {
+  return post("/auth/google", { credential });
+}
+
+export function signInDev(name: string, email: string): Promise<AuthUser> {
+  return post("/auth/dev", { name, email });
+}
+
+export function signOutRequest(): Promise<{ ok: boolean }> {
+  return post("/auth/logout", {});
 }
 
 export function fetchAssessments(): Promise<AssessmentSummary[]> {
