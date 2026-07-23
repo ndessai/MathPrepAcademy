@@ -14,6 +14,7 @@ export {
   type Question,
   type PublicQuestion,
   type AssessmentKind,
+  type ExamType,
   type Assessment,
   type AssessmentSummary,
   type AssessmentDetail,
@@ -34,4 +35,10 @@ export {
   type SubmitAttemptBody,
 } from "./schemas";
 
-export { gradeResponses, topicBreakdown, performanceMessage } from "./scoring";
+export {
+  gradeResponses,
+  topicBreakdown,
+  performanceMessage,
+  EXAM_SCORING,
+  type ScoringRule,
+} from "./scoring";

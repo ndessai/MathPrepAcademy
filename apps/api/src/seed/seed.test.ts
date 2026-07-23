@@ -100,13 +100,17 @@ describe("assessment definitions", () => {
     }
   });
 
-  it("every practice set has a matching mock assessment", () => {
+  it("every practice set has a matching mock assessment with its contest's timing", () => {
     for (const set of PRACTICE_SETS) {
-      const id = `mock-${String(set.setNumber).padStart(2, "0")}`;
+      const id =
+        set.examType === "amc8"
+          ? `mock-${String(set.setNumber).padStart(2, "0")}`
+          : `${set.examType}-mock-${String(set.setNumber).padStart(2, "0")}`;
       const mock = ASSESSMENTS.find((a) => a.id === id);
       expect(mock, `${id} missing`).toBeDefined();
       expect(mock!.questionIds).toEqual(set.questions.map((q) => q.id));
-      expect(mock!.timeLimitMinutes).toBe(40);
+      expect(mock!.examType).toBe(set.examType);
+      expect(mock!.timeLimitMinutes).toBe(set.examType === "amc8" ? 40 : 75);
     }
   });
 

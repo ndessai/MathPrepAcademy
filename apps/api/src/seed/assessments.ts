@@ -51,13 +51,18 @@ const DIAGNOSTIC_QUESTION_IDS = [
   "logic-05",
 ];
 
-const TOPIC_QUIZZES: Assessment[] = TOPICS.map((topic) => ({
+// Topic quizzes cover the AMC 8 bank's 8 topics; precalculus exists only in
+// AMC 12 practice sets and has no standalone quiz.
+const QUIZ_TOPICS = TOPICS.filter((topic) => topic.id !== "precalculus");
+
+const TOPIC_QUIZZES: Assessment[] = QUIZ_TOPICS.map((topic) => ({
   id: `quiz-${topic.id}`,
   title: `${topic.label} Quiz`,
   description: `Six questions covering ${topic.description
     .charAt(0)
     .toLowerCase()}${topic.description.slice(1)}`,
   kind: "topic-quiz",
+  examType: "amc8" as const,
   timeLimitMinutes: 15,
   questionIds: [1, 2, 3, 4, 5, 6].map((n) => `${idPrefix(topic.id)}-0${n}`),
 }));
@@ -81,15 +86,29 @@ function idPrefix(topicId: string): string {
   return prefix;
 }
 
-const PRACTICE_MOCKS: Assessment[] = PRACTICE_SETS.map((set) => ({
-  id: `mock-${String(set.setNumber).padStart(2, "0")}`,
-  title: `AMC 8 Mock Exam #${set.setNumber}`,
-  description:
-    "Full-length simulation: 25 questions in 40 minutes, with difficulty ramping just like the real AMC 8. No penalty for guessing — never leave a question blank.",
-  kind: "mock",
-  timeLimitMinutes: 40,
-  questionIds: set.questions.map((q) => q.id),
-}));
+const EXAM_LABEL = { amc8: "AMC 8", amc10: "AMC 10", amc12: "AMC 12" } as const;
+
+const PRACTICE_MOCKS: Assessment[] = PRACTICE_SETS.map((set) => {
+  const label = EXAM_LABEL[set.examType];
+  // AMC 8 mocks keep their original short ids (mock-02, ...); AMC 10/12 mocks
+  // are namespaced by contest (amc10-mock-01, ...).
+  const id =
+    set.examType === "amc8"
+      ? `mock-${String(set.setNumber).padStart(2, "0")}`
+      : `${set.examType}-mock-${String(set.setNumber).padStart(2, "0")}`;
+  return {
+    id,
+    title: `${label} Mock Exam #${set.setNumber}`,
+    description:
+      set.examType === "amc8"
+        ? "Full-length simulation: 25 questions in 40 minutes, with difficulty ramping just like the real AMC 8. No penalty for guessing — never leave a question blank."
+        : `Full-length simulation: 25 questions in 75 minutes with official ${label} scoring — 6 points per correct answer, 1.5 per blank, 0 per wrong. Leaving a hard question blank beats a wild guess.`,
+    kind: "mock",
+    examType: set.examType,
+    timeLimitMinutes: set.examType === "amc8" ? 40 : 75,
+    questionIds: set.questions.map((q) => q.id),
+  };
+});
 
 export const ASSESSMENTS: Assessment[] = [
   {
@@ -98,6 +117,7 @@ export const ASSESSMENTS: Assessment[] = [
     description:
       "Full-length simulation: 25 questions in 40 minutes, with difficulty ramping just like the real AMC 8. No penalty for guessing — never leave a question blank.",
     kind: "mock",
+    examType: "amc8",
     timeLimitMinutes: 40,
     questionIds: MOCK_QUESTION_IDS,
   },
@@ -107,6 +127,7 @@ export const ASSESSMENTS: Assessment[] = [
     description:
       "Ten mixed questions across every AMC 8 topic to find your starting point. Takes about 15 minutes.",
     kind: "diagnostic",
+    examType: "amc8",
     timeLimitMinutes: 15,
     questionIds: DIAGNOSTIC_QUESTION_IDS,
   },

@@ -4,6 +4,7 @@ import { Hono } from "hono";
 
 import type { AssessmentDetail, ScoreReport } from "@mathprep/core";
 import {
+  EXAM_SCORING,
   gradeResponses,
   startAttemptSchema,
   submitAttemptSchema,
@@ -41,6 +42,7 @@ export function createApp(db: DatabaseSync): Hono {
       title: assessment.title,
       description: assessment.description,
       kind: assessment.kind,
+      examType: assessment.examType,
       timeLimitMinutes: assessment.timeLimitMinutes,
       questionCount: assessment.questionIds.length,
       questions: questions.map(({ id, topic, difficulty, stem, choices }) => ({
@@ -91,7 +93,11 @@ export function createApp(db: DatabaseSync): Hono {
     }
 
     const questions = getAssessmentQuestions(db, assessment);
-    const graded = gradeResponses(questions, parsed.data.responses);
+    const graded = gradeResponses(
+      questions,
+      parsed.data.responses,
+      EXAM_SCORING[assessment.examType],
+    );
     const completed = completeAttempt(
       db,
       attempt.id,
@@ -104,6 +110,7 @@ export function createApp(db: DatabaseSync): Hono {
       attemptId: completed.id,
       assessmentId: assessment.id,
       assessmentTitle: assessment.title,
+      examType: assessment.examType,
       studentName: completed.studentName,
       startedAt: completed.startedAt,
       completedAt: completed.completedAt ?? new Date().toISOString(),
@@ -131,12 +138,13 @@ export function createApp(db: DatabaseSync): Hono {
     }
     const responses = getAttemptResponses(db, attempt.id) ?? {};
     const questions = getAssessmentQuestions(db, assessment);
-    const graded = gradeResponses(questions, responses);
+    const graded = gradeResponses(questions, responses, EXAM_SCORING[assessment.examType]);
 
     const report: ScoreReport = {
       attemptId: attempt.id,
       assessmentId: assessment.id,
       assessmentTitle: assessment.title,
+      examType: assessment.examType,
       studentName: attempt.studentName,
       startedAt: attempt.startedAt,
       completedAt: attempt.completedAt,

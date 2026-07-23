@@ -15,6 +15,7 @@ interface AssessmentRow {
   title: string;
   description: string;
   kind: Assessment["kind"];
+  exam_type: Assessment["examType"];
   time_limit_minutes: number;
   question_ids: string;
 }
@@ -47,6 +48,7 @@ function toAssessment(row: AssessmentRow): Assessment {
     title: row.title,
     description: row.description,
     kind: row.kind,
+    examType: row.exam_type,
     timeLimitMinutes: row.time_limit_minutes,
     questionIds: JSON.parse(row.question_ids) as string[],
   };
@@ -88,6 +90,7 @@ export function listAssessments(db: DatabaseSync): AssessmentSummary[] {
       title: a.title,
       description: a.description,
       kind: a.kind,
+      examType: a.examType,
       timeLimitMinutes: a.timeLimitMinutes,
       questionCount: a.questionIds.length,
     };

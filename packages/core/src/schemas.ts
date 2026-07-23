@@ -27,6 +27,7 @@ export const assessmentSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   kind: z.enum(["mock", "diagnostic", "topic-quiz"]),
+  examType: z.enum(["amc8", "amc10", "amc12"]),
   timeLimitMinutes: z.number().int().positive(),
   questionIds: z.array(z.string().min(1)).min(1),
 });

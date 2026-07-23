@@ -92,6 +92,26 @@ test("completed attempts appear in the student's history on the hub", async ({ p
   await expect(page.getByRole("heading", { name: "Score report" })).toBeVisible();
 });
 
+test("AMC 10 and AMC 12 mocks are listed and use official scoring (blanks earn 1.5)", async ({
+  page,
+}) => {
+  await page.goto("/assessment");
+  await chooseStudent(page, "Quinn");
+  await expect(page.getByRole("heading", { name: "AMC 10", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "AMC 12", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "AMC 12 Mock Exam #1" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Start AMC 10 Mock Exam #1" }).click();
+  await expect(page.getByText("Question 1 of 25")).toBeVisible();
+  await expect(page.getByRole("timer")).toHaveText(/^(74|75):\d{2}$/);
+
+  // Submit everything blank: official AMC 10 scoring gives 25 x 1.5 = 37.5.
+  page.once("dialog", (dialog) => void dialog.accept());
+  await page.getByRole("button", { name: "Submit answers" }).click();
+  await expect(page.getByRole("heading", { name: "Score report" })).toBeVisible();
+  await expect(page.getByLabel("Score")).toHaveText("37.5 / 150");
+});
+
 test("mock exam serves 25 questions with a 40-minute clock", async ({ page }) => {
   await page.goto("/assessment");
   await chooseStudent(page, "Riley");

@@ -9,11 +9,24 @@ The question bank lives in `apps/api/src/seed/questions.ts`; assessment definiti
 `apps/api/src/seed/assessments.ts`. Seed data is validated against the zod schemas in
 `@mathprep/core` at server boot and in `apps/api/src/seed/seed.test.ts`.
 
-**Read `style-guide.md` in this skill directory first** — it is the house style
-distilled from the real 2022-2025 AMC 8 exams (stem voice, story-per-band,
-reasoning-step targets, distractor menu, notation) plus the archetype catalog already
-used by the bank. New questions must match it and must not reuse an archetype already
-in the catalog for the same difficulty.
+**Read the style guide for the target contest first** — each is distilled from real
+exams and defines stem voice, per-band reasoning-step targets, distractor menus, and
+notation:
+
+- `style-guide.md` — AMC 8 (2022-2025 exams)
+- `style-guide-amc10.md` — AMC 10 (2022-2024 A/B exams)
+- `style-guide-amc12.md` — AMC 12 (2022-2024 A/B exams; includes precalculus:
+  trig, logs, complex numbers, polynomial theory)
+
+New questions must match the guide and must not reuse an archetype already in the
+catalog for the same difficulty.
+
+Practice sets live in `apps/api/src/seed/sets/{amc8,amc10,amc12}/set-NN.ts` with id
+conventions `sNN-qPP` (AMC 8), `a10sNN-qPP`, `a12sNN-qPP`. Every set is 25 questions,
+positions 1-10 easy / 11-20 medium / 21-25 hard **relative to its contest**. Exam
+types carry official scoring (`EXAM_SCORING` in `@mathprep/core`): AMC 8 is +1/0/0
+in 40 minutes; AMC 10/12 are +6 correct / +1.5 blank / 0 wrong (max 150) in 75
+minutes.
 
 Also in this directory:
 

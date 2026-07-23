@@ -37,21 +37,25 @@ export function ResultsPage() {
       (new Date(report.completedAt).getTime() - new Date(report.startedAt).getTime()) / 60_000,
     ),
   );
+  // AMC 10/12 blanks earn 1.5 points, so scores can be non-integer.
+  const score = Number.isInteger(report.score) ? String(report.score) : report.score.toFixed(1);
 
   return (
     <div className="results">
       <h2>Score report</h2>
       <section className="panel score-panel">
         <p className="score-headline" aria-label="Score">
-          {report.score} / {report.maxScore}
+          {score} / {report.maxScore}
         </p>
         <p>
           <strong>{report.studentName}</strong> · {report.assessmentTitle}
         </p>
         <p>
-          Answered {report.answered} of {report.maxScore} · about {minutes} min
+          Answered {report.answered} of {report.results.length} · about {minutes} min
         </p>
-        <p className="performance">{performanceMessage(report.score, report.maxScore)}</p>
+        <p className="performance">
+          {performanceMessage(report.score, report.maxScore, report.examType)}
+        </p>
       </section>
 
       <section>

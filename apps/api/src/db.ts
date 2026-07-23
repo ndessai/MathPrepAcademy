@@ -37,10 +37,12 @@ function migrate(db: DatabaseSync): void {
       title TEXT NOT NULL,
       description TEXT NOT NULL,
       kind TEXT NOT NULL CHECK (kind IN ('mock', 'diagnostic', 'topic-quiz')),
+      exam_type TEXT NOT NULL DEFAULT 'amc8' CHECK (exam_type IN ('amc8', 'amc10', 'amc12')),
       time_limit_minutes INTEGER NOT NULL,
       question_ids TEXT NOT NULL
     );
 
+    -- AMC 10/12 award 1.5 points per blank, so scores are REAL, not INTEGER.
     CREATE TABLE IF NOT EXISTS attempts (
       id TEXT PRIMARY KEY,
       assessment_id TEXT NOT NULL REFERENCES assessments(id),
@@ -48,8 +50,8 @@ function migrate(db: DatabaseSync): void {
       started_at TEXT NOT NULL,
       completed_at TEXT,
       responses TEXT,
-      score INTEGER,
-      max_score INTEGER
+      score REAL,
+      max_score REAL
     );
 
     CREATE INDEX IF NOT EXISTS idx_attempts_student ON attempts(student_name, started_at DESC);
@@ -89,8 +91,8 @@ function seedIfEmpty(db: DatabaseSync): void {
 
   const knownIds = new Set(allQuestions.map((q) => q.id));
   const insertAssessment = db.prepare(
-    `INSERT INTO assessments (id, title, description, kind, time_limit_minutes, question_ids)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO assessments (id, title, description, kind, exam_type, time_limit_minutes, question_ids)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
   );
   for (const raw of ASSESSMENTS) {
     const a = assessmentSchema.parse(raw);
@@ -104,6 +106,7 @@ function seedIfEmpty(db: DatabaseSync): void {
       a.title,
       a.description,
       a.kind,
+      a.examType,
       a.timeLimitMinutes,
       JSON.stringify(a.questionIds),
     );

@@ -39,6 +39,12 @@ export const TOPICS = [
     label: "Logic & Spatial Reasoning",
     description: "Logic puzzles, calendars, clocks, painted cubes, and visual patterns.",
   },
+  {
+    id: "precalculus",
+    label: "Precalculus",
+    description:
+      "Trigonometry, logarithms, complex numbers, and polynomial theory (AMC 12 territory).",
+  },
 ] as const;
 
 export type TopicId = (typeof TOPICS)[number]["id"];

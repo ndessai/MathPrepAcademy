@@ -25,11 +25,19 @@ export type PublicQuestion = Pick<Question, "id" | "topic" | "difficulty" | "ste
 
 export type AssessmentKind = "mock" | "diagnostic" | "topic-quiz";
 
+/**
+ * Which MAA contest an assessment emulates. Determines scoring: AMC 8 is
+ * +1/0/0 (max 25); AMC 10/12 are +6 per correct, +1.5 per blank, 0 per wrong
+ * (max 150), 75 minutes.
+ */
+export type ExamType = "amc8" | "amc10" | "amc12";
+
 export interface Assessment {
   id: string;
   title: string;
   description: string;
   kind: AssessmentKind;
+  examType: ExamType;
   timeLimitMinutes: number;
   questionIds: string[];
 }
@@ -39,6 +47,7 @@ export interface AssessmentSummary {
   title: string;
   description: string;
   kind: AssessmentKind;
+  examType: ExamType;
   timeLimitMinutes: number;
   questionCount: number;
 }
@@ -86,6 +95,7 @@ export interface ScoreReport {
   attemptId: string;
   assessmentId: string;
   assessmentTitle: string;
+  examType: ExamType;
   studentName: string;
   startedAt: string;
   completedAt: string;

@@ -65,8 +65,20 @@ export function AssessmentHub() {
     }
   }
 
-  const exams = assessments?.filter((a) => a.kind !== "topic-quiz") ?? [];
   const quizzes = assessments?.filter((a) => a.kind === "topic-quiz") ?? [];
+  const examSections = (
+    [
+      { type: "amc8", label: "AMC 8" },
+      { type: "amc10", label: "AMC 10" },
+      { type: "amc12", label: "AMC 12" },
+    ] as const
+  )
+    .map((section) => ({
+      ...section,
+      items:
+        assessments?.filter((a) => a.kind !== "topic-quiz" && a.examType === section.type) ?? [],
+    }))
+    .filter((section) => section.items.length > 0);
 
   return (
     <div className="hub">
@@ -93,11 +105,11 @@ export function AssessmentHub() {
 
       {assessments === null && !error && <p>Loading assessments…</p>}
 
-      {exams.length > 0 && (
-        <section>
-          <h3>Exams</h3>
+      {examSections.map((section) => (
+        <section key={section.type}>
+          <h3>{section.label}</h3>
           <ul className="assessment-list quiz-grid">
-            {exams.map((a) => (
+            {section.items.map((a) => (
               <li key={a.id} className="assessment-card">
                 <div>
                   <h4>{a.title}</h4>
@@ -116,7 +128,7 @@ export function AssessmentHub() {
             ))}
           </ul>
         </section>
-      )}
+      ))}
 
       {quizzes.length > 0 && (
         <section>
